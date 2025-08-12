@@ -1,0 +1,45 @@
+EV/EBITDA Calculator - Project Structure
+==========================================
+
+📁 Fianance/
+├── 📄 index.html                    # Main application (EV/EBITDA Calculator)
+├── 📄 sample_companies.csv          # Sample data for testing batch functionality
+├── 📄 README.md                     # Comprehensive project documentation
+└── 📄 project-structure.txt         # This file
+
+File Descriptions:
+------------------
+
+1. index.html
+   - Complete web application
+   - EV and EBITDA calculation tools
+   - CSV upload and batch processing
+   - Responsive design with modern UI
+   - No external dependencies (except PapaParse CDN)
+
+2. sample_companies.csv
+   - 10 sample companies with real-world data
+   - Includes major tech companies and established firms
+   - Demonstrates proper CSV format
+   - Ready for immediate testing
+
+3. README.md
+   - Complete project documentation
+   - Feature descriptions and usage instructions
+   - Technical details and customization guide
+   - Business applications and limitations
+
+4. project-structure.txt
+   - Simple overview of project organization
+   - File descriptions and purpose
+
+Usage Instructions:
+------------------
+
+1. Open index.html in any modern web browser
+2. Test individual calculations (EV, EBITDA, EV/EBITDA)
+3. Upload sample_companies.csv to test batch processing
+4. Export results and analyze investment opportunities
+
+No installation or server setup required!
+Perfect for financial professionals, analysts, and investors.

@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV/EBITDA Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .calculation-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .ev-section, .ebitda-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .ev-section h2, .ebitda-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ev-section h2::before {
+            content: "🏢";
+            font-size: 1.2rem;
+        }
+
+        .ebitda-section h2::before {
+            content: "💰";
+            font-size: 1.2rem;
+        }
+
+        .calculation-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .calculation-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .calculation-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .calculate-sub-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .calculate-sub-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .calculated-value {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .manual-input, .csv-upload {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .manual-input h2, .csv-upload h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+        }
+
+        .upload-area p {
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .upload-area .icon {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .results-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-header h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .export-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .result-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .result-main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .result-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .explanation {
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .details-toggle {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .details-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .details-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .details-panel ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .details-panel li {
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .batch-results {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            display: none;
+        }
+
+        .batch-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .batch-header h2 {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .batch-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .sort-btn:hover {
+            background: #5a6268;
+        }
+
+        .sort-btn.active {
+            background: #28a745;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .results-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .error-message {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            color: #1565c0;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .calculation-sections {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .result-main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EV/EBITDA Calculator</h1>
+            <p>Professional valuation analysis tool for investment decisions</p>
+        </div>
+
+        <div class="main-content">
+            <!-- EV and EBITDA Calculation Sections -->
+            <div class="calculation-sections">
+                <!-- EV Calculation Section -->
+                <div class="ev-section">
+                    <h2>Enterprise Value (EV) Calculator</h2>
+                    <button class="calculation-toggle" id="evToggle">Show EV Calculation</button>
+                    
+                    <div class="calculation-panel" id="evPanel">
+                        <h3>Method 1: Market Cap + Debt - Cash</h3>
+                        <form id="evForm">
+                            <div class="form-group">
+                                <label for="marketCap">Market Capitalization</label>
+                                <input type="number" id="marketCap" placeholder="Enter market cap" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="totalDebt">Total Debt</label>
+                                <input type="number" id="totalDebt" placeholder="Enter total debt" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="cashEquivalents">Cash & Cash Equivalents</label>
+                                <input type="number" id="cashEquivalents" placeholder="Enter cash amount" step="0.01" min="0">
+                            </div>
+                            <button type="submit" class="calculate-sub-btn">Calculate EV</button>
+                        </form>
+                        
+                        <div class="info-box">
+                            <strong>Formula:</strong> EV = Market Cap + Total Debt - Cash & Cash Equivalents
+                        </div>
+                    </div>
+                    
+                    <div class="calculated-value" id="evResult">
+                        Calculated EV: <span id="evValue">0</span>
+                    </div>
+                </div>
+
+                <!-- EBITDA Calculation Section -->
+                <div class="ebitda-section">
+                    <h2>EBITDA Calculator</h2>
+                    <button class="calculation-toggle" id="ebitdaToggle">Show EBITDA Calculation</button>
+                    
+                    <div class="calculation-panel" id="ebitdaPanel">
+                        <h3>Method 1: Net Income + Interest + Taxes + Depreciation + Amortization</h3>
+                        <form id="ebitdaForm">
+                            <div class="form-group">
+                                <label for="netIncome">Net Income</label>
+                                <input type="number" id="netIncome" placeholder="Enter net income" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="interestExpense">Interest Expense</label>
+                                <input type="number" id="interestExpense" placeholder="Enter interest expense" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="incomeTaxes">Income Taxes</label>
+                                <input type="number" id="incomeTaxes" placeholder="Enter income taxes" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="depreciation">Depreciation</label>
+                                <input type="number" id="depreciation" placeholder="Enter depreciation" step="0.01" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="amortization">Amortization</label>
+                                <input type="number" id="amortization" placeholder="Enter amortization" step="0.01" min="0">
+                            </div>
+                            <button type="submit" class="calculate-sub-btn">Calculate EBITDA</button>
+                        </form>
+                        
+                        <div class="info-box">
+                            <strong>Formula:</strong> EBITDA = Net Income + Interest + Taxes + Depreciation + Amortization
+                        </div>
+                    </div>
+                    
+                    <div class="calculated-value" id="ebitdaResult">
+                        Calculated EBITDA: <span id="ebitdaValue">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <!-- Manual Input -->
+                <div class="manual-input">
+                    <h2>EV/EBITDA Calculation</h2>
+                    <form id="manualForm">
+                        <div class="form-group">
+                            <label for="companyName">Company Name</label>
+                            <input type="text" id="companyName" placeholder="Enter company name">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev">Enterprise Value (EV)</label>
+                            <input type="number" id="ev" placeholder="Enter EV amount or use calculated value above" step="0.01" min="0">
+                            <small style="color: #6c757d; font-size: 0.8rem;">Use the calculated EV from above or enter manually</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="ebitda">EBITDA</label>
+                            <input type="number" id="ebitda" placeholder="Enter EBITDA amount or use calculated value above" step="0.01">
+                            <small style="color: #6c757d; font-size: 0.8rem;">Use the calculated EBITDA from above or enter manually</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="currency">Currency</label>
+                            <select id="currency">
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="JPY">JPY (¥)</option>
+                                <option value="CAD">CAD (C$)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="unit">Unit</label>
+                            <select id="unit">
+                                <option value="millions">Millions</option>
+                                <option value="billions">Billions</option>
+                                <option value="thousands">Thousands</option>
+                                <option value="actual">Actual Amount</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="calculate-btn">Calculate EV/EBITDA</button>
+                    </form>
+                </div>
+
+                <!-- CSV Upload -->
+                <div class="csv-upload">
+                    <h2>Batch Analysis</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="icon">📁</div>
+                        <p><strong>Click to upload CSV/Excel file</strong></p>
+                        <p>or drag and drop here</p>
+                        <p style="font-size: 0.9rem; margin-top: 15px;">
+                            Required columns: company_name, ev, ebitda<br>
+                            Optional: currency, unit
+                        </p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+                </div>
+            </div>
+
+            <!-- Error/Success Messages -->
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <h2>Analysis Results</h2>
+                    <button class="export-btn" id="exportBtn">Export Results</button>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-main">
+                        <div class="result-item">
+                            <div class="result-value" id="evEbitdaRatio">0.00</div>
+                            <div class="result-label">EV/EBITDA Ratio</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value" id="score">0</div>
+                            <div class="result-label">Score (0-100)</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value" id="recommendationValue">-</div>
+                            <div class="result-label">Recommendation</div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation" id="recommendation">
+                        Enter values to see recommendation
+                    </div>
+                    
+                    <div class="explanation" id="explanation">
+                        Enter company financial data above to calculate the EV/EBITDA ratio and receive investment recommendations.
+                    </div>
+                    
+                    <button class="details-toggle" id="detailsToggle">
+                        Show In-Depth Details
+                    </button>
+                    
+                    <div class="details-panel" id="detailsPanel">
+                        <h3>Calculation Details</h3>
+                        <ul>
+                            <li><strong>Formula:</strong> EV/EBITDA = Enterprise Value ÷ EBITDA</li>
+                            <li><strong>Your Calculation:</strong> <span id="calculationDetails">-</span></li>
+                        </ul>
+                        
+                        <h3>Interpretation Bands</h3>
+                        <ul>
+                            <li><strong>&lt; 8:</strong> Undervalued (Strong Buy)</li>
+                            <li><strong>8-12:</strong> Fairly Valued (Hold)</li>
+                            <li><strong>&gt; 12:</strong> Overvalued (Sell)</li>
+                        </ul>
+                        
+                        <h3>Due Diligence Checklist</h3>
+                        <ul>
+                            <li>Compare with industry peers</li>
+                            <li>Consider company growth prospects</li>
+                            <li>Evaluate debt levels and cash flow</li>
+                            <li>Review sector-specific factors</li>
+                            <li>Analyze historical trends</li>
+                        </ul>
+                        
+                        <h3>Limitations</h3>
+                        <ul>
+                            <li>Doesn't account for growth rates</li>
+                            <li>May not reflect quality of earnings</li>
+                            <li>Industry-specific benchmarks vary</li>
+                            <li>Market conditions affect interpretation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Results Table -->
+            <div class="batch-results" id="batchResults">
+                <div class="batch-header">
+                    <h2>Batch Analysis Results</h2>
+                    <div class="batch-controls">
+                        <button class="sort-btn" id="sortByName">Sort by Name</button>
+                        <button class="sort-btn" id="sortByRatio">Sort by Ratio</button>
+                        <button class="sort-btn" id="sortByScore">Sort by Score</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>EV</th>
+                                <th>EBITDA</th>
+                                <th>EV/EBITDA</th>
+                                <th>Score</th>
+                                <th>Recommendation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PapaParse for CSV processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // EV and EBITDA calculation elements
+            const evToggle = document.getElementById('evToggle');
+            const evPanel = document.getElementById('evPanel');
+            const evForm = document.getElementById('evForm');
+            const evResult = document.getElementById('evResult');
+            const evValue = document.getElementById('evValue');
+            
+            const ebitdaToggle = document.getElementById('ebitdaToggle');
+            const ebitdaPanel = document.getElementById('ebitdaPanel');
+            const ebitdaForm = document.getElementById('ebitdaForm');
+            const ebitdaResult = document.getElementById('ebitdaResult');
+            const ebitdaValue = document.getElementById('ebitdaValue');
+
+            // Main form elements
+            const manualForm = document.getElementById('manualForm');
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const detailsToggle = document.getElementById('detailsToggle');
+            const detailsPanel = document.getElementById('detailsPanel');
+            const resultsSection = document.getElementById('resultsSection');
+            const batchResults = document.getElementById('batchResults');
+
+            // EV Calculation Toggle
+            evToggle.addEventListener('click', function() {
+                if (evPanel.style.display === 'none' || evPanel.style.display === '') {
+                    evPanel.style.display = 'block';
+                    evToggle.textContent = 'Hide EV Calculation';
+                } else {
+                    evPanel.style.display = 'none';
+                    evToggle.textContent = 'Show EV Calculation';
+                }
+            });
+
+            // EBITDA Calculation Toggle
+            ebitdaToggle.addEventListener('click', function() {
+                if (ebitdaPanel.style.display === 'none' || ebitdaPanel.style.display === '') {
+                    ebitdaPanel.style.display = 'block';
+                    ebitdaToggle.textContent = 'Hide EBITDA Calculation';
+                } else {
+                    ebitdaPanel.style.display = 'none';
+                    ebitdaToggle.textContent = 'Show EBITDA Calculation';
+                }
+            });
+
+            // EV Form Submission
+            evForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const marketCap = parseFloat(document.getElementById('marketCap').value) || 0;
+                const totalDebt = parseFloat(document.getElementById('totalDebt').value) || 0;
+                const cashEquivalents = parseFloat(document.getElementById('cashEquivalents').value) || 0;
+                
+                const ev = marketCap + totalDebt - cashEquivalents;
+                
+                evValue.textContent = ev.toLocaleString('en-US', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+                evResult.style.display = 'block';
+                
+                // Auto-fill the main form
+                document.getElementById('ev').value = ev.toFixed(2);
+                
+                showMessage('EV calculated successfully!', 'success');
+            });
+
+            // EBITDA Form Submission
+            ebitdaForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const netIncome = parseFloat(document.getElementById('netIncome').value) || 0;
+                const interestExpense = parseFloat(document.getElementById('interestExpense').value) || 0;
+                const incomeTaxes = parseFloat(document.getElementById('incomeTaxes').value) || 0;
+                const depreciation = parseFloat(document.getElementById('depreciation').value) || 0;
+                const amortization = parseFloat(document.getElementById('amortization').value) || 0;
+                
+                const ebitda = netIncome + interestExpense + incomeTaxes + depreciation + amortization;
+                
+                ebitdaValue.textContent = ebitda.toLocaleString('en-US', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                });
+                ebitdaResult.style.display = 'block';
+                
+                // Auto-fill the main form
+                document.getElementById('ebitda').value = ebitda.toFixed(2);
+                
+                showMessage('EBITDA calculated successfully!', 'success');
+            });
+
+            // Manual form submission
+            manualForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const companyName = document.getElementById('companyName').value;
+                const ev = document.getElementById('ev').value;
+                const ebitda = document.getElementById('ebitda').value;
+
+                if (!companyName || !ev || !ebitda) {
+                    showMessage('Please fill in all required fields.', 'error');
+                    return;
+                }
+
+                if (parseFloat(ebitda) <= 0) {
+                    showMessage('EBITDA must be greater than zero for meaningful analysis.', 'error');
+                    return;
+                }
+
+                // Show results section
+                resultsSection.style.display = 'block';
+                
+                // Calculate EV/EBITDA
+                const ratio = (parseFloat(ev) / parseFloat(ebitda)).toFixed(2);
+                const score = calculateScore(parseFloat(ratio));
+                const recommendation = getRecommendation(parseFloat(ratio));
+                
+                updateResults(ratio, score, recommendation, companyName, ev, ebitda);
+                showMessage('Calculation completed successfully!', 'success');
+            });
+
+            // File upload interaction
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#667eea';
+                uploadArea.style.background = '#f0f4ff';
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#dee2e6';
+                uploadArea.style.background = 'white';
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#dee2e6';
+                uploadArea.style.background = 'white';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+
+            // Details toggle
+            detailsToggle.addEventListener('click', function() {
+                if (detailsPanel.style.display === 'none' || detailsPanel.style.display === '') {
+                    detailsPanel.style.display = 'block';
+                    detailsToggle.textContent = 'Hide In-Depth Details';
+                } else {
+                    detailsPanel.style.display = 'none';
+                    detailsToggle.textContent = 'Show In-Depth Details';
+                }
+            });
+
+            // Export functionality
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                if (window.batchResults && window.batchResults.length > 0) {
+                    exportToCSV(window.batchResults);
+                } else {
+                    showMessage('No batch results to export. Please upload a CSV file first.', 'error');
+                }
+            });
+
+            function exportToCSV(data) {
+                const headers = ['Company Name', 'EV', 'EBITDA', 'EV/EBITDA', 'Score', 'Recommendation'];
+                const csvContent = [
+                    headers.join(','),
+                    ...data.map(row => [
+                        `"${row.companyName}"`,
+                        row.ev,
+                        row.ebitda,
+                        row.ratio,
+                        row.score,
+                        row.recommendation
+                    ].join(','))
+                ].join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'ev_ebitda_analysis.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showMessage('Results exported successfully!', 'success');
+            }
+
+            // Helper functions
+            function showMessage(message, type) {
+                const errorMsg = document.getElementById('errorMessage');
+                const successMsg = document.getElementById('successMessage');
+                
+                if (type === 'error') {
+                    errorMsg.textContent = message;
+                    errorMsg.style.display = 'block';
+                    successMsg.style.display = 'none';
+                } else {
+                    successMsg.textContent = message;
+                    successMsg.style.display = 'block';
+                    errorMsg.style.display = 'none';
+                }
+                
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                    successMsg.style.display = 'none';
+                }, 5000);
+            }
+
+            function calculateScore(ratio) {
+                if (ratio <= 6) return 90;
+                if (ratio <= 8) return 78;
+                if (ratio <= 12) return 55;
+                if (ratio <= 18) return 25;
+                return 10;
+            }
+
+            function getRecommendation(ratio) {
+                if (ratio <= 6) return 'Strong Buy';
+                if (ratio <= 8) return 'Buy';
+                if (ratio <= 12) return 'Hold';
+                if (ratio <= 18) return 'Sell';
+                return 'Strong Sell';
+            }
+
+            function updateResults(ratio, score, recommendation, companyName, ev, ebitda) {
+                document.getElementById('evEbitdaRatio').textContent = ratio;
+                document.getElementById('score').textContent = score;
+                document.getElementById('recommendationValue').textContent = recommendation;
+                document.getElementById('recommendation').textContent = recommendation;
+                document.getElementById('calculationDetails').textContent = `${ev} ÷ ${ebitda} = ${ratio}`;
+                
+                // Update explanation
+                let explanation = '';
+                if (ratio < 8) {
+                    explanation = `With an EV/EBITDA ratio of ${ratio}, this company appears undervalued compared to typical market standards. Consider this a potential buying opportunity, but always conduct thorough due diligence.`;
+                } else if (ratio <= 12) {
+                    explanation = `The EV/EBITDA ratio of ${ratio} suggests this company is fairly valued. This represents a balanced investment opportunity that may be suitable for a hold position.`;
+                } else {
+                    explanation = `An EV/EBITDA ratio of ${ratio} indicates this company may be overvalued. Exercise caution and consider waiting for better entry points or exploring other opportunities.`;
+                }
+                document.getElementById('explanation').textContent = explanation;
+            }
+
+            function handleFileUpload(file) {
+                if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                    Papa.parse(file, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            if (results.errors.length > 0) {
+                                showMessage('Error parsing CSV: ' + results.errors[0].message, 'error');
+                                return;
+                            }
+                            
+                            if (results.data.length === 0) {
+                                showMessage('CSV file is empty or has no valid data.', 'error');
+                                return;
+                            }
+                            
+                            // Validate required columns
+                            const requiredColumns = ['company_name', 'ev', 'ebitda'];
+                            const firstRow = results.data[0];
+                            const missingColumns = requiredColumns.filter(col => !(col in firstRow));
+                            
+                            if (missingColumns.length > 0) {
+                                showMessage(`Missing required columns: ${missingColumns.join(', ')}`, 'error');
+                                return;
+                            }
+                            
+                            // Process CSV data
+                            processCSVData(results.data);
+                            showMessage(`Successfully processed ${results.data.length} companies!`, 'success');
+                        },
+                        error: function(error) {
+                            showMessage('Error reading CSV file: ' + error.message, 'error');
+                        }
+                    });
+                } else {
+                    showMessage('Please upload a CSV file.', 'error');
+                }
+            }
+
+            function processCSVData(data) {
+                const results = [];
+                
+                data.forEach((row, index) => {
+                    const companyName = row.company_name || `Company ${index + 1}`;
+                    const ev = parseFloat(row.ev) || 0;
+                    const ebitda = parseFloat(row.ebitda) || 0;
+                    const currency = row.currency || 'USD';
+                    const unit = row.unit || 'millions';
+                    
+                    if (ebitda <= 0) {
+                        results.push({
+                            companyName,
+                            ev: ev.toFixed(2),
+                            ebitda: ebitda.toFixed(2),
+                            ratio: 'N/A',
+                            score: 'N/A',
+                            recommendation: 'N/A',
+                            error: 'EBITDA must be > 0'
+                        });
+                    } else {
+                        const ratio = (ev / ebitda).toFixed(2);
+                        const score = calculateScore(parseFloat(ratio));
+                        const recommendation = getRecommendation(parseFloat(ratio));
+                        
+                        results.push({
+                            companyName,
+                            ev: ev.toFixed(2),
+                            ebitda: ebitda.toFixed(2),
+                            ratio,
+                            score,
+                            recommendation,
+                            error: null
+                        });
+                    }
+                });
+                
+                displayBatchResults(results);
+                batchResults.style.display = 'block';
+            }
+
+            function displayBatchResults(results) {
+                const tbody = document.getElementById('resultsTableBody');
+                tbody.innerHTML = '';
+                
+                results.forEach(result => {
+                    const row = document.createElement('tr');
+                    
+                    if (result.error) {
+                        row.innerHTML = `
+                            <td>${result.companyName}</td>
+                            <td>${result.ev}</td>
+                            <td>${result.ebitda}</td>
+                            <td style="color: #dc3545;">${result.ratio}</td>
+                            <td style="color: #dc3545;">${result.score}</td>
+                            <td style="color: #dc3545;">${result.recommendation}</td>
+                        `;
+                    } else {
+                        row.innerHTML = `
+                            <td>${result.companyName}</td>
+                            <td>${result.ev}</td>
+                            <td>${result.ebitda}</td>
+                            <td>${result.ratio}</td>
+                            <td>${result.score}</td>
+                            <td>${result.recommendation}</td>
+                        `;
+                    }
+                    
+                    tbody.appendChild(row);
+                });
+                
+                            // Store results for export
+            window.batchResults = results;
+            
+            // Add sorting event listeners
+            addSortingListeners();
+        }
+
+        function addSortingListeners() {
+            const sortByName = document.getElementById('sortByName');
+            const sortByRatio = document.getElementById('sortByRatio');
+            const sortByScore = document.getElementById('sortByScore');
+            
+            // Remove active class from all buttons
+            function clearActiveButtons() {
+                [sortByName, sortByRatio, sortByScore].forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
+            
+            sortByName.addEventListener('click', function() {
+                clearActiveButtons();
+                sortByName.classList.add('active');
+                sortResults('companyName');
+            });
+            
+            sortByRatio.addEventListener('click', function() {
+                clearActiveButtons();
+                sortByRatio.classList.add('active');
+                sortResults('ratio');
+            });
+            
+            sortByScore.addEventListener('click', function() {
+                clearActiveButtons();
+                sortByScore.classList.add('active');
+                sortResults('score');
+            });
+        }
+
+        function sortResults(sortBy) {
+            if (!window.batchResults) return;
+            
+            const results = [...window.batchResults];
+            
+            results.sort((a, b) => {
+                if (sortBy === 'companyName') {
+                    return a.companyName.localeCompare(b.companyName);
+                } else if (sortBy === 'ratio') {
+                    if (a.ratio === 'N/A' && b.ratio === 'N/A') return 0;
+                    if (a.ratio === 'N/A') return 1;
+                    if (b.ratio === 'N/A') return -1;
+                    return parseFloat(a.ratio) - parseFloat(b.ratio);
+                } else if (sortBy === 'score') {
+                    if (a.score === 'N/A' && b.score === 'N/A') return 0;
+                    if (a.score === 'N/A') return 1;
+                    if (b.score === 'N/A') return -1;
+                    return parseInt(a.score) - parseInt(b.score);
+                }
+                return 0;
+            });
+            
+            displayBatchResults(results);
+        }
+        });
+    </script>
+</body>
+</html>
